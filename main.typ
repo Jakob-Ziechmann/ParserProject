@@ -10,10 +10,13 @@
 
 = Grammatik
 ```
-Ausdruck        -> '(' Ausdruck ')' | InfixAusdruck | PrefixAusdruck 
+Ausdruck        -> '(' Ausdruck ')' | InfixAusdruck | PrefixAusdruck | 
+                   Literal | Identifier
 InfixAusdruck   -> Ausdruck InfixOperator Ausdruck 
 PrefixAusdruck  -> PrefixAusdruck Ausdruck
 InfixOperator   -> '&' | '|' | '=>' | '<=' | '<=>'
 PrefixAusdruck  -> '!'
+Literal         -> 'WAHR' | 'FALSCH' | '1' | '0'
+Identifier      -> char {char}
 ```
 
