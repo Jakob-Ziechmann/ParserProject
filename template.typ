@@ -36,3 +36,10 @@
 
   body
 }
+
+
+/////
+// automata
+/////
+#import "@preview/finite:0.3.0"
+#import finite: automaton
