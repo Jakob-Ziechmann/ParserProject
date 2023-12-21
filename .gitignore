@@ -1,3 +1,4 @@
+bin
 #exclude all pdf files exept for main.pdf
 *.pdf 
 !main.pdf

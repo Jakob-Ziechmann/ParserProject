@@ -12,63 +12,44 @@
 Bei diesem Parser Projekt handelt es sich um eine freiwillige Übung aus der 
 Universität. Der Parser soll logische Formeln Interpretieren können, welche 
 die Operationen $and$(und), $or$(oder), $not$(nicht), $=>$(Implikation rechts),
-$<=$(Implikation links) und $<=>$(Äquivalenz) beinhalten können. Dazu soll der 
-Parser nachdem er einen Ausdruck gelesen hat ihn mit dem Quine–McCluskey 
-Algorithmus vereinfachen.
+$arrow.double.l$(Implikation links) und $<=>$(Äquivalenz) beinhalten können. 
+Dazu soll der Parser nachdem er einen Ausdruck gelesen hat ihn mit dem 
+Quine–McCluskey Algorithmus vereinfachen.
 
-= Grammatik
+= Syntax
+Die Syntax der logischen Ausdrücke soll den Regeln, welche in der boolschen 
+Algebra definiert sind, folgen mit ein par kleineren Änderungen, damit gegebene
+Ausdrücke leichter per Tastatur umzusetzen sind. So werden die Operatoren 
+$and$, $or$, $not$, $=>$, $arrow.double.l$ und $<=>$ durch folgende Zeichen 
+dargestellt: \*, +, !, =>, <=, <=> 
+
+== Grammatik
+Die erste Aufgabe ist an dieser Stelle eine Grammatik zu definieren, auf 
+welcher die nachfolgenden Systeme und Entscheidungen basieren werden.  
 ```
-Ausdruck        -> '(' Ausdruck ')' | InfixAusdruck | PrefixAusdruck | 
-                   Literal | Identifier
-InfixAusdruck   -> Ausdruck InfixOperator Ausdruck 
-PrefixAusdruck  -> PrefixAusdruck Ausdruck
-InfixOperator   -> '&' | '|' | '=>' | '<=' | '<=>'
+Ausdruck        -> '(' Ausdruck ')' | Ausdruck InfixOperator Ausdruck | 
+                    PrefixOperator Ausdruck | Literal | Identifier
+InfixOperator   -> '*' | '+' | '=>' | '<=' | '<=>'
 PrefixAusdruck  -> '!'
 Literal         -> '1' | '0'
-Identifier      -> char {char}
+Identifier      -> ['a'|...|'z']
 ```
 
-= Tokenizer
-Die Idee für den Tokenizer ist, dass wir einen Automaten haben, der valide 
-Tokens akzeptiert. Darunter sind zum Beispiel Identifier, welche aus Buchstaben
-von $a$ bis $z$ bestehen oder der Und-Oprator. Der Automat erlaubt es uns nun 
-den zu Parsenden String Buchstabe für Buchstabe durchlaufen und zu gucken, ob
-der 
+= Implementierung
+== Lexer
+Die erste ebene eines jeden Parsers ist der Lexer oder auch Tokenizer genann.
+Er hat die Aufgabe einen gegebenen String in seine Einzelteile zu zerlegen.
+Um das in einem Beispiel zu verdeutlichen betrachtn wir den String 
+$(p * q) => a$, welcher von dem Tokenizer in 
+\'(\', \'p\', \'\*\', \'q\', \')\', \'=>\' \'a\'
+zerlegt wird. Wichtig dabei ist, dass der Tokenizer immer das längste valide
+Token bilden möchte, sonst wird nämlich aus abc \'a\', \'b\', \'c\' und nicht 
+\'abc\'.
 
-#align(center)[#automaton((
-    q0: (q1: "a, ..., z", q2: "(, ), &, |, !", q3: ("<"), q4: ("="), 
-      q6: ("0,1")),
-    q1: (q1: "a, ..., z"),
-    q2: (),
-    q3: (q7: "="),
-    q4: (q5: ">"),
-    q5: (),
-    q6: (),
-    q7: (q5: ">")
-  ), layout: (
-    q0: (0, 0),
-    q1: (4, 0),
-    q2: (4, 2),
-    q3: (4, -4),
-    q4: (4, -2), 
-    q5: (8, -2),
-    q6: (4, 4),
-    q7: (8, -4),
-  ), style: (
-    q0-q1: (curve: 0),
-    q0-q2: (curve: 0.5),
-    q0-q4: (curve: -.5),
-    q0-q3: (curve: -1),
-    q3-q4: (curve: 0),
-    q4-q5: (curve: 0),
-    q3-q7: (curve: 0),
-    q7-q5: (curve: 0),
-    q1-q1: (anchor: right),
-    q1: (final: true),
-    q2: (final: true),
-    q5: (final: true), 
-    q6: (final: true), 
-    q7: (final: true),
-  )
-)]
+Wir lösen das in unserm Projekt mit einem Deterministischen Automat, welcher 
+die Sprache aller gültigen Tokens akzeptiert. Die Idee ist and dieser Stelle, 
+dass wir den Inputstring Zeichen für Zeichen lesen, bis wir in einer Senke 
+landen. Danach geht man bis zum letzten akzeptierenden Zustand zurück und gibt
+den bis dort hin gelesenen String aus. 
 
+== Abstract Syntax Tree
